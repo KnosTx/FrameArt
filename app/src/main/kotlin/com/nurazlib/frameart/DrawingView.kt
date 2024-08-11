@@ -11,7 +11,7 @@ import android.graphics.Path
 // Kelas untuk menangani canvas menggambar
 class DrawingView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
-) : SurfaceView(context, attrs), SurfaceHolder.Callback {
+) : SurfaceView(context, attrs) {
 
     private val paint = Paint().apply {
         color = 0xFF000000.toInt()
@@ -24,7 +24,6 @@ class DrawingView @JvmOverloads constructor(
 
     init {
         paths.add(currentPath)
-        holder.addCallback(this)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -34,7 +33,7 @@ class DrawingView @JvmOverloads constructor(
             }
             MotionEvent.ACTION_MOVE -> {
                 currentPath.lineTo(event.x, event.y)
-                draw()
+                invalidate()
             }
             MotionEvent.ACTION_UP -> {
                 val newPath = Path(currentPath)
@@ -45,24 +44,10 @@ class DrawingView @JvmOverloads constructor(
         return true
     }
 
-    override fun surfaceCreated(holder: SurfaceHolder) {
-        draw()
-    }
-
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        draw()
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder) {}
-
-    private fun draw() {
-        val canvas = holder.lockCanvas()
-        canvas?.let {
-            it.drawColor(0xFFFFFFFF.toInt()) // Ganti dengan warna latar belakang yang diinginkan
-            paths.forEach { path ->
-                it.drawPath(path, paint)
-            }
-            holder.unlockCanvasAndPost(it)
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+        paths.forEach { path ->
+            canvas?.drawPath(path, paint)
         }
     }
 
@@ -70,11 +55,12 @@ class DrawingView @JvmOverloads constructor(
     fun clearCanvas() {
         paths.clear()
         currentPath.reset()
-        draw()
+        invalidate()
     }
 
     // Fungsi untuk menambah layer
     fun addLayer() {
+        // Menambahkan path baru sebagai layer
         val newPath = Path()
         paths.add(newPath)
     }
