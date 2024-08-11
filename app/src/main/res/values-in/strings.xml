@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">FrameArt</string>
+    <string name="add_frame">Tambahkan Frame</string>
+    <string name="add_layer">Tambahkan Layer</string>
+    <string name="layer">Layer</string>
+</resources>
