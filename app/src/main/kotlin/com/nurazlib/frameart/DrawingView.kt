@@ -5,22 +5,22 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.SurfaceView
+import android.view.View
 import android.graphics.Path
 
 // Kelas untuk menangani canvas menggambar
 class DrawingView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
-) : SurfaceView(context, attrs) {
+) : View(context, attrs) {
 
     private val paint = Paint().apply {
-        color = 0xFF000000.toInt()
+        color = 0xFF000000.toInt()  // Warna hitam
         strokeWidth = 5f
         style = Paint.Style.STROKE
     }
 
     private val paths = mutableListOf<Path>()
-    private val currentPath = Path()
+    private var currentPath = Path()
 
     init {
         paths.add(currentPath)
@@ -33,21 +33,22 @@ class DrawingView @JvmOverloads constructor(
             }
             MotionEvent.ACTION_MOVE -> {
                 currentPath.lineTo(event.x, event.y)
-                invalidate()
+                invalidate()  // Meminta ulang gambar
             }
             MotionEvent.ACTION_UP -> {
                 val newPath = Path(currentPath)
                 paths.add(newPath)
-                currentPath.reset()
+                currentPath = Path()  // Reset currentPath setelah selesai menggambar
+                paths.add(currentPath)
             }
         }
         return true
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {  // Tidak nullable
         super.onDraw(canvas)
         paths.forEach { path ->
-            canvas?.drawPath(path, paint)
+            canvas.drawPath(path, paint)
         }
     }
 
@@ -58,10 +59,10 @@ class DrawingView @JvmOverloads constructor(
         invalidate()
     }
 
-    // Fungsi untuk menambah layer
+    // Fungsi untuk menambah layer (path baru)
     fun addLayer() {
-        // Menambahkan path baru sebagai layer
         val newPath = Path()
         paths.add(newPath)
+        invalidate()
     }
 }
