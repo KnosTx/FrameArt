@@ -27,19 +27,24 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-
-    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: 8.0.0
-
     - name: Set Permissions
       run: chmod +x gradlew
 
-    - name: Build with Gradle Wrapper
-      run: ./gradlew build
+    - name: Set up Android SDK
+      run: |
+        echo "Installing Android SDK Command Line Tools"
+        sudo apt-get update
+        sudo apt-get install -y wget unzip
+        export ANDROID_HOME=$HOME/android-sdk
+        mkdir -p $ANDROID_HOME/cmdline-tools
+        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O cmdline-tools.zip
+        unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+        chmod +x $ANDROID_HOME/cmdline-tools/cmdline-tools/bin/sdkmanager
+        yes | $ANDROID_HOME/cmdline-tools/cmdline-tools/bin/sdkmanager --update
+        yes | $ANDROID_HOME/cmdline-tools/cmdline-tools/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+
+    - name: Build APK
+      run: ./gradlew assembleRelease
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v2
